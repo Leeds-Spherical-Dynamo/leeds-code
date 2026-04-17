@@ -1,0 +1,16 @@
+The case 2 benchmark in Christensen et al 2001, Phys. Earth. Planet. Inter. 128, p 25-34, 
+has a conducting inner core, so i_Nic /= 1. Ra_bench =110 which converts to Ra_unified=7.15d04. 
+The other parameters are as in the case 1 benchmark, Pm=5, Pr=1 E=1d-03, radius ratio 0.35. 
+
+The energy scaling is the same as in benchmark 1, the factor being 364.97 again.
+
+Now since E_bench=845.60 we expect magnetic Energy_unified=308619. 
+The kinetic energy scales similarly, so now kinetic Energy_bench=42.388 converts to
+kinetic energy Energy_unified=15470.3. The inner core rotation omega_bench = -2.6595, 
+which converts to omega_unified=-13.2975, since the timescale changes by a factor Pm=5. 
+ 
+At i_N=64, i_Nic=16, i_L=64, i_M=16 and i_Mp=4 (going up to m=64) KE_unified=15,474.6
+and ME_unified=308,651. This is satisfactory agreement for this resolution. The inner 
+core rotation omega omega_unified = -13.2979 from column 2 of rot_torque.dat     
+
+

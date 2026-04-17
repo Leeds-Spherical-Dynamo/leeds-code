@@ -1,0 +1,9 @@
+This folder holds a number of matlab, bash, and HPC submission scripts
+that can be used as is or as examples for modification.
+
+anelastic_benchmark.m	: matlab script to generate "planet_model.txt.in"
+diffus_model.m		: matlab script to generate "diffusivity.txt"
+jup_model_finalsmooth2_paper.m : matlab script to generate input parameters for 
+                                 French et al 2012
+run.bolt		: example submission script for ARCHER2
+sub.sh			: example submission script for ARC4 at University of Leeds	

@@ -1,0 +1,56 @@
+
+Sun Dec 12 09:59:29 GMT 2021
+mpiifort -O3 -c -cpp -ip
+#define _Nth 16 
+#define _Nr  16
+ module parameters
+ i_N           = 128 
+ i_Nic         = 1  
+ i_L           = 128 
+ i_M           = 128  
+ i_Mp          = 1   
+ d_Ra          = 6.5d04      
+ d_Pr          = 1.0d0    
+ d_Pm          = 5.0d0    
+ d_E           = 1.0d-03  
+ d_rratio      = 0.350d0   
+ d_Hyp         = 0.0d-02
+ b_boussinesq  = .true. 
+ b_diff_profile = .false.
+ b_rot_tstep   = .false.    
+ b_vel_tstep   = .true.
+ b_cod_tstep   = .true.
+ b_mag_tstep   = .true.
+ b_init_with_noise = .false.
+ i_vel_bc      = 1   
+ i_cod_bc      = 1
+ b_inhombc_C = .true. 
+ d_source = 0.0d0   
+ d_qo  = -1.0d0  
+ d_qi  = 0.d0
+ b_inhom_magPol = .true.  
+ b_fixed_at_outer = .true.
+ b_fixed_at_inner = .false.
+ i_save_rate1  = 10000
+ i_save_rate2  = 100
+ i_maxtstep    = 1500000
+ d_cpuhours    = 1d10
+ d_time        = 0.d0
+ d_timestep    = -5d-05
+ d_corr_upper  = 0.300d0   
+ d_corr_lower  = 0.03000d0 
+ d_implicit    = 0.5d0
+ d_init_pert   = 1d-08 
+ i_KL  = 3
+ i_L1  = i_L-1
+ i_M1  = i_M-1
+ i_Ma  = i_M*3/2
+ i_H   = i_L*i_M - i_Mp*i_M1*i_M/2
+ i_Th  = i_L*3/2
+ i_Ph  = i_Ma*2
+ i_H1  = i_H/_Nth - 1
+ i_pH1 = (_Nr+i_H1)/_Nr-1
+ i_pN  = (_Nr+i_N-1)/_Nr
+ i_pTh = (_Nth+i_Th-1)/_Nth
+ d_PI  = 3.1415926535897931d0
+ end module parameters

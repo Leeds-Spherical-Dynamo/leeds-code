@@ -1,0 +1,104 @@
+/** @file parallel.h */
+
+#ifndef parallel_h
+#define parallel_h
+
+/***************************************************************/
+#define _PAR_IO
+/***************************************************************/
+
+/***************************************************************/
+#define _Nth 1
+#define _Nr  1
+/***************************************************************/
+
+/***************************************************************/
+/* uncomment to use shtns*/
+/*#define _SHTNS*/
+/***************************************************************/
+
+/*-------------------------------------------------------------*/
+
+/*! total number of processors*/
+#define _Np (_Nr*_Nth)
+#if _Np != (1*1)
+/*! macro: Present if using more than one processor */
+#define _MPI
+#endif
+
+#if defined(_MPI) && defined(_PAR_IO)
+#define _PNCDF
+#endif
+
+/*-------------------------------------------------------------*/
+
+/*! macro: nh: harmonic mode index, l: degree, m_: order */
+#define _loop_lm_vars  \
+   integer :: nh; \
+   integer :: l; \
+   integer :: m_
+
+/*! macro: loop over harmonics */
+#define _loop_lm_begin(a)  \
+   do nh = 0, a%H%pH1;  \
+      l  = a%H%l(a%H%pH0+nh);  \
+      m_ = a%H%m(a%H%pH0+nh);
+
+/*! macro: end of loop over harmonics*/
+#define _loop_lm_end  \
+   end do
+
+/*-------------------------------------------------------------*/
+
+/*! macro: (i_M+1)/2 */
+#define _Hc  ((i_M+1)/2)
+/*! macro: i_H/_Hc  */
+#define _Hr  (i_H/_Hc)
+/*! macro: _Hc/_Nth */
+#define _pHc (_Hc/_Nth)
+
+/*! macro: set up loop variables for lm loop */
+#define _loop_setlm_vars  \
+   integer :: nh,l,m,m_,i__,j__,jo__
+
+/*! macro: begin set lm loop */
+#define _loop_setlm_begin  \
+   nh = -1;  \
+   jo__ = (th_rnk)*_pHc;  \
+   do j__ = jo__+1, jo__+_pHc;  \
+      do i__ = 1, _Hr;  \
+         m = j__-1;  \
+         l = m*i_Mp+i__-1;  \
+         if(l>=i_L)  m = 2*_Hc-j__;  \
+         if(l>=i_L)  l = i_L-_Hr+i__-1;  \
+         m_ = m*i_Mp;  \
+         nh = nh + 1;
+   
+/*! macro: end of set lm loop */
+#define _loop_setlm_end  \
+     end do;  \
+   end do
+
+/*-------------------------------------------------------------*/
+
+/*! set sum loop variables */
+#define _loop_sumth_vars  \
+   integer :: nh,m,m_,m__,s__
+
+/*! macro: begin sum loop */
+#define _loop_sumth_begin  \
+   m  = -1;  \
+   m_ = -1;  \
+   do nh = 0, i_H1;  \
+      m__ = m_;  \
+      m_  = var_H%m(nh);  \
+      s__ = var_H%s(nh);  \
+      if(m_/=m__) m = m + 1;  \
+          
+/*! macro: end sum loop */
+#define _loop_sumth_end  \
+   end do
+
+/*-------------------------------------------------------------*/
+#endif /* ndef parallel_h */
+

@@ -1,0 +1,18 @@
+In the benchmark paper,  Christensen et al 2001, Phys. Earth. Planet. Inter. 128, p 25-34,
+the equations are slightly different from ours because it uses the viscous scaling rather 
+than the magnetic timescale. The Christensen Rayleigh number of Ra_bench = 100 converts to
+Ra_unified = Ra_bench /(ro * E), where E=0.001 and ro= 20/13 = 1/(1-0.35). 
+So Ra-unified = 6.5d04. Pr=1, Pm=5, E=0.001, radius ratio =0.35.
+
+The kinetic energy in the paper needs rescaling to: Energy_unified = Pm^2 V0 Energy_bench.
+V0 is the dimensionless volume of the shell, 14.5988, so Pm^2 V0= 364.97.
+So since E_bench=58.3348 we expect kinetic Energy_unified=851.618.
+ 
+At i_N=64, i_L=64 and i_Mp=4, i_M=16 (going up to m=64) KE_unified=851.6
+The agreement is satisfactory for this resolution.
+Note that the timestep needs to be less than 3d-05 to get accurate agreement,
+which means that d_corr_upper and d_corr_lower need to be in the region of 0.02
+and 0.002 respectively. Where great accuracy is not needed, larger values might 
+speed up the production time.  
+
+

@@ -1,0 +1,10 @@
+This folder contains input files required for running a series of dynamo benchmarks and tests.
+Boussinesq and Anelastic benchmarks are split into the named folders.
+All files required to run these simulations are in the relevant folders, EXCEPT for state.cdf.in.
+These are larger files, and can be found elsewhere - TBD!
+
+To run the cases, put parameters.f90 into the ./program folder, and any .txt.in files into the
+install directory alongside main.out.
+You will also need to obtain the state.cdf.in files and put them in the install directory.
+
+Example output .dat files are included to compare results.

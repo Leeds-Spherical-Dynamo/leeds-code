@@ -1,0 +1,208 @@
+INSTDIR  = ./run_directory/
+AUXLDIR  = ./auxiliary/
+MODSDIR  = ./modules/
+PROGDIR  = ./program/
+UTILDIR  = ./utils/
+UTIL     = ash2cont
+TESTDIR  = ./testdir/1/
+
+TRANSFORM  = fftw3
+_AUXLOBJ   = dplm.o dpmm1.o dpmm.o fftw3.o gauwts.o plm.o pmm1.o pmm.o schnla.o
+AUXLOBJ    = $(patsubst %,$(AUXLDIR)%,$(_AUXLOBJ))
+MODSOBJ    = $(AUXLOBJ) \
+             codensity.o legendre.o meshs.o dyn_mpi.o composition.o\
+             velocity.o magnetic.o rotation.o nonlinear.o parameters.o \
+             timestep.o transform.o variables.o io.o
+VER := $(shell grep define ./version.h | grep "_version" | cut -f3 -d' ')
+version := $(patsubst "%",%,$(VER))
+#------------------------------------------------------------------------
+# Compiler flags/settings.
+#
+# Below are a series of example compiler settings for different environments.
+# We have included example settings for ARC4 (the HPC at Leeds University),
+# ARCHER2 national HPC facility, and settings for a generic workstation/laptop
+# linux installation.
+# Please uncomment the settings for your use case. For the HPC's, we've included
+# guidance on what modules should be loaded in the environment.
+#---------------------------------------------------------------------------
+
+#----------------------------------- -------------------------------------
+#------------------------- ARCHER2---------------------------------------
+#
+# Leave all of the default modules, and add the following 'required modules'
+#
+# Required modules: cray-fftw/3.3.8.9 cray-hdf5-parallel
+# cray-netcdf-hdf5parallel gnuplot
+#------------------------------------------------------------------------
+# COMPILER        = ftn
+# COMPFLAGS       = -O3 -c -I${MKLROOT}/include\
+#                   -I${SHTNS_HOME}/include/
+# LIBS            = -L${SHTNS_HOME}/lib/ -lshtns
+#-----------------------------------------------------------------------
+
+#----------------------Aire-intel----------------------------------------
+# Load cemac module environment using `. /users/cemac/cemac.sh`
+# Then load required modules
+# > module load intel intelmpi netcdf hdf5 fftw
+# submission script should source the cemac.sh and then load the modules
+#
+#COMPILER = ${MPIF90}
+#COMPFLAGS = -O1 -c -cpp -qmkl=sequential\
+#                   -I${SHTNS_HOME}/include/
+#LIBS = -lnetcdf -lnetcdff -lfftw3 -qmkl=sequential\
+#                   -L${SHTNS_HOME}/lib/ -lshtns
+
+#----------------------Aire-gnu----------------------------------------
+# Load cemac module environment using `. /users/cemac/cemac.sh`
+# Then load required modules, 
+# > module load gnu mvpich atlas netcdf hdf5 fftw
+# submission script should source the cemac.sh and then load the modules
+#
+#COMPILER = ${MPIF90}
+#COMPFLAGS = -c -cpp -O2\
+#                   -I${SHTNS_HOME}/include/
+#LIBS = -llapack -lf77blas -lcblas -latlas -lnetcdff -lnetcdf -lm -lfftw3 -lgfortran\
+#                   -L${SHTNS_HOME}/lib/ -lshtns
+
+#------------------------------------------------------------------------
+# ---------------------ARC 4--------------------------------------------
+#
+# Required modules: intel/19.0.4 intelmpi/2019 fftw/3.3.8 hdf5/1.8.21
+# netcdf/4.6.3 mkl/2019.0
+#------------------------------------------------------------------------
+# COMPILER        = mpiifort
+# COMPFLAGS       = -O3 -c -cpp -ip\
+#                   -I${SHTNS_HOME}/include/
+# LIBS            = -lmkl_intel_lp6 -I${SHTNS_HOME}/include/lapack95_lp64 \
+#                   -lmkl_core -lfftw3 -lnetcdf -lnetcdff \
+#                   -L${SHTNS_HOME}/lib/ -lshtns
+
+
+#------------------------------------------------------------------------
+#-----------------------foe-linux---------------------------------------
+#
+# Required modules: intel, netcdf, openmpi, 
+#------------------------------------------------------------------------
+#COMPILER        = mpifort
+#COMPFLAGS       = -O3 -c -cpp -ip -I${NETCDF}/include\
+#                  -I${SHTNS_HOME}/include/
+#LIBS            = -L${NETCDF}/lib -lmkl_intel_lp64 -l kl_sequential -lmkl_lapack95_lp64 \
+#                  -lmkl_core -lfftw3 -lnetcdf -lnetcdff\
+#                  -L${SHTNS_HOME}/lib/ -lshtns
+
+
+#------------------------------------------------------------------------
+#---------------- Workstation/laptop Linux (eg Ubuntu).------------------
+#
+# See install instructions for set of packages that should be installed.
+#------------------------------------------------------------------------
+#COMPILER    = mpifort
+#COMPFLAGS   = -ffree-line-length-none  -x f95-cpp-input -c -O3  -I/usr/include\
+#              -I${SHTNS_HOME}/include/
+#LIBS        = -llapack -lfftw3 -lnetcdff -lnetcdf\
+#              -L${SHTNS_HOME}/lib/ -lshtns -lm -lc
+
+#------------------------------------------------------------------------
+.SUFFIXES:
+
+all : 	$(MODSOBJ) $(PROGDIR)main.F90
+	$(COMPILER) $(COMPFLAGS) $(PROGDIR)main.F90
+	$(COMPILER) -o ./main.out main.o $(MODSOBJ) $(LIBS)
+	rm main.o
+
+install : main.out
+	if test ! -d $(INSTDIR); then mkdir -p $(INSTDIR); fi
+	tar -czf $(INSTDIR)/code.tgz --exclude=*/.git \
+	   Makefile parallel.h program/ modules/
+	mv ./main.out $(INSTDIR)
+	echo "Leeds Spherical Dynamo $(version)" > $(INSTDIR)/main.info
+	echo "Compiled on `uname -n`" >> $(INSTDIR)/main.info
+	echo "Using `$(COMPILER) --version | head -n 1`" >> $(INSTDIR)/main.info
+	date >> $(INSTDIR)/main.info
+	echo $(COMPILER) $(COMPFLAGS)  $(LIBS)>> $(INSTDIR)/main.info
+	grep define parallel.h | grep 'e _Nth' >> $(INSTDIR)/main.info
+	grep define parallel.h | grep 'e _Nr' >> $(INSTDIR)/main.info
+	grep define parallel.h | grep 'SHTNS' >> $(INSTDIR)/main.info
+	cut -d! -f1 $(PROGDIR)parameters.F90 | grep parameter | \
+	   cut -d: -f3  >> $(INSTDIR)/main.info
+	cut -d! -f1 $(PROGDIR)parameters.F90 | grep "qh_" | grep "::" | cut -d: -f3  >> $(INSTDIR)/main.info
+	cut -d! -f1 $(PROGDIR)parameters.F90 | grep "ldiff_" | grep "::" | cut -d: -f3 >> $(INSTDIR)/main.info
+
+test : 	$(MODSOBJ) $(PROGDIR)test.F90
+	$(COMPILER) $(COMPFLAGS) $(PROGDIR)test.F90
+	$(COMPILER) -o ./test.out test.o $(MODSOBJ) $(LIBS) 
+	if test ! -d $(TESTDIR); then mkdir -p $(TESTDIR); fi
+	rm test.o
+	mv test.out $(TESTDIR)
+	echo $(HOST) > $(TESTDIR)/test.info
+	date >> $(TESTDIR)/test.info
+	echo $(COMPILER) $(COMPFLAGS) >> $(TESTDIR)/test.info
+	grep define parallel.h | grep 'e _Nth' >> $(TESTDIR)/test.info
+	grep define parallel.h | grep 'e _Nr' >> $(TESTDIR)/test.info          
+	cut -d! -f1 $(PROGDIR)parameters.F90 | grep parameter | \
+	   cut -d: -f3  >> $(TESTDIR)/test.info
+
+util : 	$(MODSOBJ) $(UTILDIR)/$(UTIL).F90
+	$(COMPILER) $(COMPFLAGS) $(UTILDIR)/$(UTIL).F90
+	$(COMPILER) -o ./$(UTIL).out $(UTIL).o $(MODSOBJ) $(LIBS)
+	rm $(UTIL).o
+
+#------------------------------------------------------------------------
+clean :
+	rm -f *.o *.mod *.d *.il core *.out; rm $(AUXLDIR)*.o
+
+#------------------------------------------------------------------------
+parameters.o : $(PROGDIR)parameters.F90 parallel.h
+	$(COMPILER) $(COMPFLAGS) $(PROGDIR)parameters.F90
+
+io.o : $(PROGDIR)io.F90 velocity.o codensity.o
+	if [[ -f $(LIBSDIR)/NETCDF.mod && ! -f ./NETCDF.mod ]] ; then\
+	  ln -s $(LIBSDIR)/NETCDF.mod . ; fi
+	if [[ -f $(LIBSDIR)/netcdf.mod && ! -f ./netcdf.mod ]] ; then\
+	  ln -s $(LIBSDIR)/netcdf.mod . ; fi
+	$(COMPILER) $(COMPFLAGS) $(PROGDIR)io.F90
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+codensity.o : $(MODSDIR)codensity.F90 timestep.o transform.o
+	$(COMPILER) $(COMPFLAGS) $(MODSDIR)codensity.F90
+
+composition.o : $(MODSDIR)composition.F90 timestep.o transform.o
+	$(COMPILER) $(COMPFLAGS) $(MODSDIR)composition.F90
+
+legendre.o : $(MODSDIR)legendre.F90 parameters.o dyn_mpi.o
+	$(COMPILER) $(COMPFLAGS) $(MODSDIR)legendre.F90
+
+magnetic.o : $(MODSDIR)magnetic.F90 timestep.o transform.o
+	$(COMPILER) $(COMPFLAGS) $(MODSDIR)magnetic.F90
+
+meshs.o : $(MODSDIR)meshs.F90 parameters.o dyn_mpi.o
+	$(COMPILER) $(COMPFLAGS) $(MODSDIR)meshs.F90
+
+dyn_mpi.o : $(MODSDIR)dyn_mpi.F90 parallel.h
+	$(COMPILER) $(COMPFLAGS) $(MODSDIR)dyn_mpi.F90
+
+nonlinear.o : $(MODSDIR)nonlinear.F90 \
+	velocity.o codensity.o composition.o
+	$(COMPILER) $(COMPFLAGS) $(MODSDIR)nonlinear.F90
+
+rotation.o : $(MODSDIR)rotation.F90 timestep.o transform.o
+	$(COMPILER) $(COMPFLAGS) $(MODSDIR)rotation.F90
+
+timestep.o : $(MODSDIR)timestep.F90 variables.o
+	$(COMPILER) $(COMPFLAGS) $(MODSDIR)timestep.F90
+
+transform.o : $(MODSDIR)transform.$(TRANSFORM).F90 variables.o
+	$(COMPILER) $(COMPFLAGS) -o transform.o \
+	$(MODSDIR)transform.$(TRANSFORM).F90
+
+variables.o : $(MODSDIR)variables.F90 legendre.o meshs.o
+	$(COMPILER) $(COMPFLAGS) $(MODSDIR)variables.F90
+
+velocity.o : $(MODSDIR)velocity.F90 timestep.o transform.o rotation.o
+	$(COMPILER) $(COMPFLAGS) $(MODSDIR)velocity.F90
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+$(AUXLDIR)%.o : $(AUXLDIR)%.f
+	$(COMPILER) $(COMPFLAGS) -o $@ $<
+

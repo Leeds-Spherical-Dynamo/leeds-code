@@ -1,0 +1,32 @@
+This case tests the inhomogeneous boundary condition options. The parameters are the same 
+as for the Christesen benchmark case 1, E=0.001, Ra=65000, Pr=1, Pm=5 with no inner core, I_Nic=1. 
+The resolution is set to i_N=128, i_L=128, i_M=128, with i_Mp=1i and d_rratio=0.35. 
+The Boussinesq option is used, with b_diff_profile = false, so the diffusivity = 1 everywhere.
+
+The new feature is that b_inhombc_C = .true. and  b_inhom_magPol = .true. This means that the 
+boundary codensities are set by whatever is in codBC.txt.in and the poloidal magnetic
+field at the boundaries is set to whatever is in mag_PolBC.txt.in. In this particular run
+the codensity is only set at the outer boundary, because the first integer in both rows is 2,
+which correponds to the outer boundary, 1 indicating the inner boundary. There are only two
+non-zero entries in codBC.txt.in, so the applied boundary condition has non-zero values
+only for l=1, m=0 and l=1, m=1. The resulting pattern can be seen by plotting the codensity
+(entropy) of the state files at te outer boundary. Of course, and desired comonation of
+spherical harmonics can be applied, at either the inner or outer boundary or both.
+
+Similarly the file  mag_PolBC.txt.in supplies the poloidal spherical harmonic coefficients
+required for the outer or inner boundary poloidal magnetic field. In this particular run,
+only outer boundary values are non-zero, because all rows of  mag_PolBC.txt.in have first 
+entry 2. The values for this run correspond to the Earth's magnetic field in the year 2000,
+the 2nd and 3rd values being the corresponding l and m values and the 4th and 5th to the
+real and imaginary parts of the corresponding harmonics, up to degree 13.  A matlab script
+magnetic_BCs.m is supplied which generates the poloidal harmonics from the gauus coefficients
+which are read in from a file earthgauss_2000.txt. The script is included in the Directory 
+Matlab_scripts. The comments in this script explain the relation between the real Gauss
+coefficients and the poloidal spherical harmonic coefficients. Note however there is an 
+arbitrary scaling factor for the strength of the poloidal field. This depends on how the
+dimensionless magnetic field unit is chosen to compare with the dimensional geomagnetic
+field units. This is not entirely straightforward, as it is not possible for all the
+parameters to have earthlike values. For example, you could set the rotation rate, the diffusivity
+and the density to have earthlike values and hence derive the unit of magnetic field from its usual
+definition. However, a better way to choose the magnetic field unit might be to get the Alfven speed
+right, as derived from torsional wave observations. 
