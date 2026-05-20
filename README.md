@@ -2,7 +2,8 @@
 Home of the Leeds Spherical Dynamo simulation code.
 
 ## Documentation
-Documentation can be found in the online [Manual](https://leeds-spherical-dynamo.github.io/manual/)
+User documentation can be found in the online [Manual](https://leeds-spherical-dynamo.github.io/manual/).
+Source code documentation can be found at [https://leeds-spherical-dynamo.github.io/code-documentation/](https://leeds-spherical-dynamo.github.io/code-documentation/).
 
 Software dependencies
 ---------------------
